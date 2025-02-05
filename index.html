@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Leave Request</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            padding: 30px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .container {
+            width: 90%;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+        }
+
+        h1 {
+           margin-bottom: 20px;
+           font-size: 2.5rem;
+           font-weight: 600;
+           color: #34495E;
+           letter-spacing: 0.5px;
+           text-transform: capitalize;
+           font-family: 'Poppins', sans-serif;
+           position: relative;
+           text-align: center;
+        }
+
+        h1:hover {
+            color: #8E44AD;
+            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+
+
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            justify-content: flex-start;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 5px;
+        }
+
+        .tab-button {
+            padding: 12px 25px;
+            background: none;
+            border: none;
+            color: #777;
+            font-size: 18px;
+            font-weight: 500;
+            margin-right: 15px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .tab-button:hover {
+            color: #4CAF50;
+        }
+
+        .tab-button.active {
+            color: #4CAF50;
+            border-bottom: 3px solid #4CAF50;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            color: #444;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
+        }
+
+        .error {
+            color: #e53935;
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .date-error {
+            color: #e53935;
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .char-count {
+            color: #666;
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+
+        button[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        button[type="submit"]:hover:not(:disabled) {
+            background-color: #45a049;
+        }
+
+        .leave-request {
+            background: #ffffff;
+            padding: 18px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-pending {
+            color: #FF9800;
+            font-weight: 600;
+        }
+
+        .status-approved {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        .status-rejected {
+            color: #F44336;
+            font-weight: 600;
+        }
+
+        #employeeLeaveHistory {
+            margin-top: 25px;
+            max-height: 450px;
+            overflow-y: auto;
+            padding-right: 15px;
+            border-right: 5px solid #f1f1f1;
+            background-color: #fafafa;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Employee Leave Request Portal</h1>
+        
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab(event, 'requestTab')">New Request</button>
+            <button class="tab-button" onclick="openTab(event, 'historyTab')">Leave History</button>
+        </div>
+
+        <div id="requestTab" class="tab-content active">
+            <form id="leaveRequestForm" onsubmit="return submitLeaveRequest(event)">
+                <div class="form-group">
+                    <label for="empid">Employee ID:</label>
+                    <input type="text" id="empid" name="empid" required>
+                    <div class="error" id="empidError">Please enter a valid Employee ID (ATS0 followed by 3 digits)</div>
+                    
+                </div>
+                <div class="form-group">
+                    <label for="leaveType">Leave Type:</label>
+                    <select id="leaveType" required>
+                        <option value="">Select Leave Type</option>
+                        <option value="annual">Annual Leave</option>
+                        <option value="sick">Sick Leave</option>
+                        <option value="personal">Personal Leave</option>
+                        <option value="casual">Casual Leave</option>
+                        <option value="other">Other Leave</option>
+                    </select>
+                    <div class="error" id="leaveTypeError">Please select a leave type</div>
+                </div>
+                <div class="form-group">
+                    <label for="startDate">Start Date:</label>
+                    <input type="date" id="startDate" required pattern="\d{4}-\d{2}-\d{2}">
+                    <div class="error" id="startDateError">Start date cannot be in the past</div>
+                    <div class="date-error" id="startDateYearError">Year must be exactly 4 digits</div>
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date:</label>
+                    <input type="date" id="endDate" required pattern="\d{4}-\d{2}-\d{2}">
+                    <div class="error" id="endDateError">End date must be after start date</div>
+                    <div class="date-error" id="endDateYearError">Year must be exactly 4 digits</div>
+                </div>
+                <div class="form-group">
+                    <label for="reason">Reason:</label>
+                    <textarea id="reason" rows="4" required></textarea>
+                    <div class="error" id="reasonError">Reason must be at least 5 characters long (excluding spaces)</div>
+                    
+                </div>
+                <button type="submit" id="submitBtn" disabled>Submit Request</button>
+            </form>
+        </div>
+
+        <div id="historyTab" class="tab-content">
+            <div id="employeeLeaveHistory"></div>
+        </div>
+    </div>
+
+    <script>
+        let leaveRequests = JSON.parse(localStorage.getItem('leaveRequests')) || [];
+        
+        // Set minimum date for date inputs to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('startDate').min = today;
+        document.getElementById('endDate').min = today;
+
+        function getCharCount(str) {
+            return str.replace(/\s/g, '').length;
+        }
+
+        function updateCharCount(inputId) {
+            const input = document.getElementById(inputId);
+            const countDisplay = document.getElementById(`${inputId}Count`);
+            const charCount = getCharCount(input.value);
+            countDisplay.textContent = `Characters (excluding spaces): ${charCount}`;
+        }
+
+        function validateDateFormat(dateString) {
+            // Check if the date matches YYYY-MM-DD format with exactly 4 digits for year
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            return dateRegex.test(dateString);
+        }
+
+        // Add input listeners for character count
+        document.getElementById('empid').addEventListener('input', () => updateCharCount('empid'));
+        document.getElementById('reason').addEventListener('input', () => updateCharCount('reason'));
+
+        function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let content of tabContents) {
+                content.classList.remove("active");
+            }
+
+            const tabButtons = document.getElementsByClassName("tab-button");
+            for (let button of tabButtons) {
+                button.classList.remove("active");
+            }
+
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+
+            if (tabName === 'historyTab') {
+                const empId = document.getElementById('empid').value;
+                if (empId) {
+                    displayEmployeeLeaveHistory(empId);
+                }
+            }
+        }
+
+        function validateForm() {
+            let isValid = true;
+            const empid = document.getElementById('empid').value;
+            const leaveType = document.getElementById('leaveType').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const reason = document.getElementById('reason').value;
+
+            // Validate Employee ID
+            const empIdRegex = /^ATS0\d{3}$/;
+            const empIdLength = getCharCount(empid);
+            if (!empIdRegex.test(empid) || empIdLength < 5) {
+                document.getElementById('empidError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('empidError').style.display = 'none';
+            }
+
+            // Validate Leave Type
+            if (!leaveType) {
+                document.getElementById('leaveTypeError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('leaveTypeError').style.display = 'none';
+            }
+
+            // Validate date formats
+            if (!validateDateFormat(startDate)) {
+                document.getElementById('startDateYearError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('startDateYearError').style.display = 'none';
+            }
+
+            if (!validateDateFormat(endDate)) {
+                document.getElementById('endDateYearError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('endDateYearError').style.display = 'none';
+            }
+
+            // Validate dates
+            const startDateTime = new Date(startDate);
+            const endDateTime = new Date(endDate);
+            const todayDateTime = new Date();
+            todayDateTime.setHours(0, 0, 0, 0);
+
+            if (startDateTime < todayDateTime) {
+                document.getElementById('startDateError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('startDateError').style.display = 'none';
+            }
+
+            if (endDateTime < startDateTime) {
+                document.getElementById('endDateError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('endDateError').style.display = 'none';
+            }
+
+            // Validate reason
+            const reasonLength = getCharCount(reason);
+            if (reasonLength < 5) {
+                document.getElementById('reasonError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('reasonError').style.display = 'none';
+            }
+
+            document.getElementById('submitBtn').disabled = !isValid;
+            return isValid;
+        }
+
+        // Add validation listeners to all form fields
+        document.getElementById('empid').addEventListener('input', validateForm);
+        document.getElementById('leaveType').addEventListener('change', validateForm);
+        document.getElementById('startDate').addEventListener('input', function(e) {
+            const value = e.target.value;
+            if (!validateDateFormat(value)) {
+                e.target.value = ''; // Clear invalid input
+            }
+            validateForm();
+        });
+        document.getElementById('endDate').addEventListener('input', function(e) {
+            const value = e.target.value;
+            if (!validateDateFormat(value)) {
+                e.target.value = ''; // Clear invalid input
+            }
+            validateForm();
+        });
+        document.getElementById('reason').addEventListener('input', validateForm);
+
+        function submitLeaveRequest(event) {
+            event.preventDefault();
+            
+            if (!validateForm()) {
+                return false;
+            }
+
+            const request = {
+                id: Date.now(),
+                employeeId: document.getElementById('empid').value,
+                leaveType: document.getElementById('leaveType').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                reason: document.getElementById('reason').value,
+                status: 'pending',
+                requestDate: new Date().toISOString()
+            };
+
+            leaveRequests.push(request);
+            localStorage.setItem('leaveRequests', JSON.stringify(leaveRequests));
+            
+            alert('Leave request submitted successfully');
+            document.getElementById('leaveRequestForm').reset();
+            document.getElementById('empidCount').textContent = 'Characters (excluding spaces): 0';
+            document.getElementById('reasonCount').textContent = 'Characters (excluding spaces): 0';
+            document.getElementById('submitBtn').disabled = true;
+            displayEmployeeLeaveHistory(request.employeeId);
+            return false;
+        }
+
+        function displayEmployeeLeaveHistory(employeeId) {
+            const employeeRequests = leaveRequests.filter(request => 
+                request.employeeId === employeeId
+            );
+            const historyContainer = document.getElementById('employeeLeaveHistory');
+            historyContainer.innerHTML = '';
+
+            if (employeeRequests.length === 0) {
+                historyContainer.innerHTML = '<p>No leave requests found for this employee.</p>';
+                return;
+            }
+
+            employeeRequests.forEach(request => {
+                const requestElement = document.createElement('div');
+                requestElement.className = 'leave-request';
+                requestElement.innerHTML = `
+                    <p><strong>Leave Type:</strong> ${request.leaveType}</p>
+                    <p><strong>Start Date:</strong> ${request.startDate}</p>
+                    <p><strong>End Date:</strong> ${request.endDate}</p>
+                    <p><strong>Reason:</strong> ${request.reason}</p>
+                    <p><strong>Status:</strong> <span class="status-${request.status}">${request.status}</span></p>
+                    <p><strong>Request Date:</strong> ${new Date(request.requestDate).toLocaleDateString()}</p>
+                `;
+                historyContainer.appendChild(requestElement);
+            });
+        }
+    </script>
+</body>
+</html>
